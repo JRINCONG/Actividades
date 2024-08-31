@@ -8,36 +8,67 @@ const actividad = require('../models/Actividad')
 
 const getAll = catchError(async(req, res) => {
 
- const results = await User.findAll({include:[item, actividad]})
+ const results = await User.findAll({where:{id:req.user.id},
+    include:[item, actividad]})
+    console.log(results)
+    results.map((item)=>{
+        delete item.dataValues.email
+        delete item.dataValues.password
+        delete item.dataValues.createdAt
+        delete item.dataValues.updatedAt
+
+        return item
+    })
     return res.status(200).json(results)
 });
 
 const Create = catchError(async(req, res)=>{
   const { password } = req.body
-  console.log("este es req.bpod",req.body)
   const hashedPassword= await bcrypt.hash(password, 10)
    const results = await User.create({...req.body, password:hashedPassword})
+   console.log(results)
+   for(let valor in results){
+    delete results.dataValues.password
+    delete results.dataValues. updatedAt
+    delete results.dataValues.email
+    delete results.dataValues.createdAt
+   }
    return res.status(201).json(results)
 
 }) 
 
 const getOne = catchError(async(req, res)=>{
     const {id}= req.params
-    const results = await User.findByPk(id)
+    const results = await User.findByPk(req.user.id)
     if(!results) return res.status(404).json({"message":"User not Found"})
+   
         return res.status(200).json(results)
-})
+    })
 
 const Destroy = catchError(async(req,res)=>{
-    const id = req.params
-    const results = await User.destroy({where:{id}})
-    res.status(200).json({"message":"User deleted successfully"})
+    const {id} = req.params
+    
+    const UserDelete = await User.findByPk(id)
+    console.log("userDelete",UserDelete)
+    if(!UserDelete) return res.status(404).json({"message":"User not Found"})
+    if(UserDelete.id === req.user.id){
+        const results = await User.destroy({where:{id}})
+        res.status(204).json({"message":"User deleted successfully"})
+
+    }
+   return res.status(404).json({"message":"you can't delete another user"})
 })
-const update = catchError(async(req, res)=>{
-     
-    const {id} = req.user
-    const results = await User.update(req.body,{where:{id}})
-    return res.status(204).json(results)
+
+const update = catchError(async(req, res)=>{     
+    const {id} = req.params
+    const UpdateUser= await User.findByPk(id)
+    if(!UpdateUser) return res.status(404).json({"message":"unauthorized"})
+    if(UpdateUser.id === req.user.id){
+        const results = await User.update(req.body,{where:{id},returning:true})
+
+        return res.status(200).json(results)
+    }
+    return res.status(404).json({"message":"unauthorized"})
 })
 
 const Login = catchError(async(req,res)=>{
@@ -50,7 +81,7 @@ const Login = catchError(async(req,res)=>{
         const token= jwt.sign(
             {user},
             process.env.TOKEN_SECRET,
-            {expiresIn:'1d'}
+            {expiresIn:'6h'}
     
         )
          return res.status(200).json({user, token})
