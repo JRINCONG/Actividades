@@ -4,13 +4,16 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const item = require('../models/Item')
 const actividad = require('../models/Actividad')
+const { sendEmail }=require('../utils/sendEmail')
+const Respuesta =require('../utils/Respuesta')
+
 
 
 const getAll = catchError(async(req, res) => {
 
  const results = await User.findAll({where:{id:req.user.id},
     include:[item, actividad]})
-    console.log(results)
+   
     results.map((item)=>{
         delete item.dataValues.email
         delete item.dataValues.password
@@ -49,7 +52,7 @@ const Destroy = catchError(async(req,res)=>{
     const {id} = req.params
     
     const UserDelete = await User.findByPk(id)
-    console.log("userDelete",UserDelete)
+    
     if(!UserDelete) return res.status(404).json({"message":"User not Found"})
     if(UserDelete.id === req.user.id){
         const results = await User.destroy({where:{id}})
@@ -87,11 +90,41 @@ const Login = catchError(async(req,res)=>{
          return res.status(200).json({user, token})
 
 })
+
+const envioMail=catchError(async(req, res)=>{
+    const {email} = req.body
+    const results = await User.findOne({where:{email}})
+    if(!results) return res.status(404).json({"message":"unauthorized"})
+     const TOKEN_PASS = jwt.sign(
+    {email},
+    process.env.TOKEN_RECOVER,
+    {expiresIn:'3m'}
+     )  
+     await sendEmail({
+    to:email,
+    subject:"Password Change",
+    html: Respuesta(results,TOKEN_PASS) 
+
+ })
+   
+
+     return res.status(200).json({"message":"email sent successfully",TOKEN_PASS})
+})
+
+const recoverPassword = catchError(async(req, res)=>{
+    console.log("este es el res",req.params.token)
+return res.status(200).json('ok')
+
+})
+
+
 module.exports = {
     getAll,
     Create,
     getOne,
     Destroy,
     update,
-    Login
+    Login,
+    envioMail,
+    recoverPassword
 }

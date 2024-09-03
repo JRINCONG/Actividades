@@ -20,6 +20,10 @@ const User = sequelize.define('user', {
         type: DataTypes.TEXT,
         allowNull: false
     },
+    token:{
+        type: DataTypes.TEXT,
+
+    }
 });
 
 module.exports = User;
