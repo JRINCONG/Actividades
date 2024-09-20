@@ -8,7 +8,7 @@ const router = express.Router();
 
 // colocar las rutas aquí
 router.use('/users',routerUser)
-router.use('/items',verifyJWT, routerItem)
-router.use('/actividades',verifyJWT,routerActividad)
+router.use('/items', routerItem)
+router.use('/actividades',routerActividad)
 
 module.exports = router;

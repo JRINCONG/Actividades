@@ -1,4 +1,4 @@
-const { getAll, Create, getOne, update, Destroy, Login, envioMail, recoverPassword, } = require('../controllers/user.controllers');
+const { getAll, Create, getOne, update, Destroy, Login, envioMail, recoverPassword, logged, } = require('../controllers/user.controllers');
 const express = require('express');
 const {verifyJWT} = require('../utils/verifyJWT')
 const routerUser = express.Router();
@@ -16,7 +16,10 @@ routerUser.route('/recover')
       .post(envioMail)
 
 routerUser.route('/:token/recover_password')
-      .post(recoverPassword)         
+      .post(recoverPassword)
+      
+routerUser.route('/me')
+      .get(verifyJWT,logged)      
 
 routerUser.route('/:id')
     .get(verifyJWT,getOne)

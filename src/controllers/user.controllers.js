@@ -29,12 +29,14 @@ const Create = catchError(async(req, res)=>{
   const { password } = req.body
   const hashedPassword= await bcrypt.hash(password, 10)
    const results = await User.create({...req.body, password:hashedPassword})
-   console.log(results)
+   
    for(let valor in results){
     delete results.dataValues.password
     delete results.dataValues. updatedAt
     delete results.dataValues.email
     delete results.dataValues.createdAt
+    delete results.dataValues.token
+    delete results.dataValues.phone
    }
    return res.status(201).json(results)
 
@@ -76,6 +78,7 @@ const update = catchError(async(req, res)=>{
 
 const Login = catchError(async(req,res)=>{
     const {password, email } = req.body
+    console.log(req.body)
     const user = await User.findOne({where:{email}})
     if(!user) return res.sendStatus(404).json({"message":"invalid credentials"})
 
@@ -89,6 +92,11 @@ const Login = catchError(async(req,res)=>{
         )
          return res.status(200).json({user, token})
 
+})
+const logged = catchError(async(req,res)=>{
+    console.log(req.user)
+    const usuario= req.user
+    return res.status(200).json({usuario})
 })
 
 const envioMail=catchError(async(req, res)=>{
@@ -126,5 +134,6 @@ module.exports = {
     update,
     Login,
     envioMail,
-    recoverPassword
+    recoverPassword,
+    logged
 }

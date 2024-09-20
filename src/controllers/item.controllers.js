@@ -40,13 +40,13 @@ const getOne = catchError(async(req, res) => {
 });
 
 const remove = catchError(async(req, res) => {
-    const { id } = req.params;
+    const { id }  = req.params;
     const DeleteItems = await Item.findByPk(id)
-    if(!DeleteItems) return res.status(404).json({"message":"Items not found"})
-
-    if(DeleteItems.userId === req.user.id){
+    if(!DeleteItems) return res.sendStatus(404).json({"message":"Items not found"})
+ 
+    if(DeleteItems.dataValues.userId === req.user.id){
         const result = await Item.destroy({ where: {id} });
-        return res.sendStatus(204).json({"message":"Items successfully eliminated"});
+        return res.json({"message":"Items successfully eliminated"});
     }
 
     return res.status(404).json({"message":"unauthorized"})
@@ -57,10 +57,7 @@ const update = catchError(async(req, res) => {
     const UpdateItems = await Item.findByPk(id)
     if(!UpdateItems) return res.status(404).json({"message":"Items not found"})
     if(UpdateItems.userId === req.user.id){
-        const result = await Item.update(
-            req.body,
-            { where: {id}, returning: true }
-        );
+        const result = await Item.update(req.body, { where: {id}, returning: true });
        
         return res.json(result[1][0]);
     }
