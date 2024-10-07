@@ -1,15 +1,18 @@
 const catchError = require('../utils/catchError');
 const Actividad = require('../models/Actividad');
-const Item = require('../models/Item')
+const item_activi = require('../models/Item_actividad')
+const items = require('../models/Item')
 
 const getAll = catchError(async(req, res) => {
     const {id} = req.user
+    console.log(req.user)
     const results = await Actividad.findAll({where :{userId:id},
-        include:[{
-            model:Item,
-            attributes:{exclude:['createdAt','updatedAt','id']}
-    }]
+        include:[{  
+            model:item_activi, 
+            attributes:{exclude:['createdAt','updatedAt','id']} }],
+       
     });
+    console.log(results)
     results.map((acti)=>{
         delete acti.dataValues.createdAt
         delete acti.dataValues.updatedAt
@@ -69,10 +72,26 @@ const update = catchError(async(req, res) => {
     return res.json(result[1][0]);
 });
 
+
+//actividad/:id/items
+
+const setActivity = (async(req, res)=>{
+ const  id  = parseInt(req.params.id);
+ console.log("este es el body",req.body)
+ console.log("este es el id de la actividad", id)
+ const Activity = await Actividad.findByPk(id)
+ await Activity.setItems(req.body)
+ const iten = await Activity.getItems()
+ console.log("Este es items",iten)
+ return res.status(201).json(iten)
+})
+
 module.exports = {
     getAll,
     create,
     getOne,
     remove,
-    update
+    update,
+    setActivity
+   
 }

@@ -1,8 +1,8 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../utils/connection');
 
-const Activity_items = sequelize.define('activity_item', {
+const Item_actividad = sequelize.define('item_activity', {
    
 });
 
-module.exports = Activity_items;
+module.exports = Item_actividad;
