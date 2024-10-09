@@ -9,7 +9,7 @@ const getAll = catchError(async(req, res) => {
     const results = await Actividad.findAll({where :{userId:id},
         include:[{  
             model:item_activi, 
-            attributes:{exclude:['createdAt','updatedAt','id']} }],
+            attributes:{exclude:['createdAt','updatedAt','id','actividadeId']} }],
        
     });
     console.log(results)

@@ -10,20 +10,20 @@ const getAll = catchError(async(req, res) => {
 
 const Create = catchError(async(req,res)=>{
 
-    const id = parseInt(req.params.id);
-
-    const results= await item_actividad.findOne({where: {
+    const id = parseInt(req.params.id);  
+  const results= await item_actividad.findOne({where: {   
         actividadeId:id,
-        itemId:req.body
-    
-    }})
-    console.log(results)
+        itemId:req.body         
+    }})   
+  console.log("Este es result",results)
+  
     if(results) return res.status(404).json({"messaje":"Items existente en esta actividad"})
       
         const addItems =  item_actividad.create({
             actividadeId:id,
             itemId:req.body
         })
+ 
         return res.status(201).json({"message":"Items Add correctamente"})
 })
 
